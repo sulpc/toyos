@@ -1,0 +1,12 @@
+# ignore all
+*
+
+# include
+!/code/
+!/code/**
+
+!/*.uvprojx
+!/.gitignore
+
+# ignore
+.vscode/
