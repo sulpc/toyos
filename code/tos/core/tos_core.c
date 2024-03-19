@@ -40,6 +40,8 @@ bool tos_init(void) {
     uint32_t        index;
     tos_task_attr_t taskAttr;
 
+    tos_irq_diable();   // irq will be enable in tos_start
+
     // state init
     tos_task_current          = nullptr;
     tos_task_prio_current     = 0;

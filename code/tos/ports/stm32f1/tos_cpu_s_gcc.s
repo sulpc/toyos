@@ -1,14 +1,8 @@
-/**
- * @file tos_cpu_s.s
- * @brief cpu dependency functions in asm
- * @note irq control, task switch, ...
- */
-
+// tos_cpu_s.s
 
 .syntax unified
 .thumb
 .text
-
 
 // Declaration Extern Functions and Variables
 
@@ -18,6 +12,7 @@
 .extern tos_task_prio_switch_to
 
 .global tos_irq_diable
+.global tos_irq_enable
 .global tos_irq_restore
 .global tos_task_switch_first
 .global tos_task_switch
@@ -32,6 +27,7 @@
 
 // in Thumb mode, extern function must use `.thumb_func` pseudo instruction
 
+
 .thumb_func
 tos_irq_diable:
     mrs     r0, primask                         // return PRIMASK
@@ -40,9 +36,15 @@ tos_irq_diable:
 
 
 .thumb_func
+tos_irq_enable:
+    cpsie   i                                   // clr PRIMASK to enable IRQ
+    bx      lr
+
+
+.thumb_func
 tos_irq_restore:
     msr     primask, r0                         // restore PRIMASK
-    cpsie   i
+    // cpsie   i                                // restore to prev status (enable or disable)
     bx      lr
 
 
@@ -61,8 +63,8 @@ tos_task_switch_first:
     ldr     r0, =NVIC_Int_Ctrl_Reg
     ldr     r1, =NVIC_PendSV_Set
     str     r1, [r0]
-    bx      lr
-    // cpsie   i                                // move to tos_irq_restore
+    cpsie   i                                   // enable irq (disabled in tos_init), trigger PendSV (task switch)
+    // bx      lr                               // switch to first task, this function will never return
 
 tos_start_error:
     b       tos_start_error                     // Should never get here
@@ -70,7 +72,7 @@ tos_start_error:
 
 .thumb_func
 tos_task_switch:
-    ldr     r0, =NVIC_Int_Ctrl_Reg              // Trigger the PendSV exception (causes context switch)
+    ldr     r0, =NVIC_Int_Ctrl_Reg              // trigger PendSV (task switch)
     ldr     r1, =NVIC_PendSV_Set
     str     r1, [r0]
     bx      lr
@@ -78,7 +80,7 @@ tos_task_switch:
 
 .thumb_func
 tos_task_switch_intr:
-    ldr     r0, =NVIC_Int_Ctrl_Reg              // Trigger the PendSV exception (causes context switch)
+    ldr     r0, =NVIC_Int_Ctrl_Reg              // trigger PendSV (task switch)
     ldr     r1, =NVIC_PendSV_Set
     str     r1, [r0]
     bx      lr
@@ -124,5 +126,5 @@ PendSV_Handler_WithoutSave:
     cpsie   i
     bx      lr
 
-    nop
+    // nop                                      // align to 2 bytes
 .end

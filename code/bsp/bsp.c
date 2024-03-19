@@ -10,7 +10,6 @@
 #include "tos_core.h"
 
 
-static uint16_t delay_us_fac    = 0;
 static uint8_t  group_prio_bits = 0;
 uint32_t        SystemCoreClock = 0;
 static bool     uart_dbg_inited = false;
@@ -96,6 +95,9 @@ void sysirq_init(void) {
 }
 
 
+#if 0
+static uint16_t delay_us_fac = 0;
+
 void delay_init(void) {
     SysTick->CTRL &= ~(1 << 2);                 // bit2=0, set clk to AHB/8
     delay_us_fac = SystemCoreClock / 8000000;   //
@@ -121,6 +123,7 @@ void delay_ms(uint32_t nms) {
         delay_us(nms * 1000);
     }
 }
+#endif
 
 
 #define dbg_putc(c)                                                                                                    \

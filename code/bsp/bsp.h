@@ -12,10 +12,12 @@ void sysclk_init(void);
 void sysirq_init(void);
 void NVIC_Init(uint8_t GroupPrio, uint8_t SubPrio, uint8_t NvicChannel);
 
-// DELAY
+#if 0
+// DELAY -- conflict with os
 void delay_init(void);
 void delay_us(uint32_t nus);
 void delay_ms(uint32_t nms);
+#endif
 
 // UART
 void uart_dbg_init(uint32_t bound);

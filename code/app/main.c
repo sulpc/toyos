@@ -78,7 +78,7 @@ static void usr_task2(void* arg) {
 static void bsp_init(void) {
     sysclk_init();
     sysirq_init();
-    delay_init();
+    // delay_init();
     uart_dbg_init(115200);
 
     log_printk("bsp init ok\n");
@@ -129,7 +129,7 @@ int main() {
     tos_cond_init(&cond, nullptr);
 
     // start tos
-    log_printk("tos_demo start...\n");
+    log_printk("\nHello, the ToyOS demo system has started...\n\n");
     tos_start();
 }
 

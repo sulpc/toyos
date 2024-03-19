@@ -8,6 +8,7 @@
     import tos_task_prio_switch_to
 
     export tos_irq_diable
+    export tos_irq_enable
     export tos_irq_restore
     export tos_task_switch_first
     export tos_task_switch
@@ -23,15 +24,23 @@ NVIC_PendSV_Set         equ     0x10000000      ; trigger PendSV
     PRESERVE8
     THUMB
 
+
 tos_irq_diable
     mrs     r0, primask                         ; return PRIMASK
     cpsid   i                                   ; set PRIMASK to disable IRQ
     bx      lr
 
+
+tos_irq_enable
+    cpsie   i                                   ; clr PRIMASK to enable IRQ
+    bx      lr
+
+
 tos_irq_restore
     msr     primask, r0                         ; restore PRIMASK
-    cpsie   i
+    ; cpsie   i                                 ; restore to prev status (enable or disable)
     bx      lr
+
 
 tos_task_switch_first
     ; set PendSV Prio
@@ -47,22 +56,22 @@ tos_task_switch_first
     ldr     r0, =NVIC_Int_Ctrl_Reg
     ldr     r1, =NVIC_PendSV_Set
     str     r1, [r0]
-    bx      lr
-    ; cpsie   i
+    cpsie   i                                   ; enable irq (disabled in tos_init), trigger PendSV (task switch)
+    ; bx      lr                                ; switch to first task, this function will never return
 
 tos_start_error
-    b       tos_start_error                     ; Should never get here
+    b       tos_start_error                     ; should never get here
 
 
 tos_task_switch
-    ldr     r0, =NVIC_Int_Ctrl_Reg              ; Trigger the PendSV exception (causes context switch)
+    ldr     r0, =NVIC_Int_Ctrl_Reg              ; trigger PendSV (task switch)
     ldr     r1, =NVIC_PendSV_Set
     str     r1, [r0]
     bx      lr
 
 
 tos_task_switch_intr
-    ldr     r0, =NVIC_Int_Ctrl_Reg              ; Trigger the PendSV exception (causes context switch)
+    ldr     r0, =NVIC_Int_Ctrl_Reg              ; trigger PendSV (task switch)
     ldr     r1, =NVIC_PendSV_Set
     str     r1, [r0]
     bx      lr
@@ -83,7 +92,6 @@ PendSV_Handler
     str     r0, [r1]
 
 PendSV_Handler_WithoutSave
-
     ; tos_task_prio_current <= tos_task_prio_switch_to
     ldr     r0, =tos_task_prio_switch_to
     ldr     r1, =tos_task_prio_current
@@ -108,5 +116,5 @@ PendSV_Handler_WithoutSave
     cpsie   i
     bx      lr
 
-    nop
+    ; nop                                       ; align to 2 bytes
     end
