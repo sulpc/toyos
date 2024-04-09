@@ -111,7 +111,7 @@ PendSV_Handler_WithoutSave
     adds    r0, r0, #0x20
     msr     psp, r0
 
-    orr     lr, lr, #0x04
+    orr     lr, lr, #0x04                       ; return use PSP
 
     cpsie   i
     bx      lr
